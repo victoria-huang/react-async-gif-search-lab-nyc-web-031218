@@ -1,6 +1,7 @@
 import React from 'react'
 import key from '../giphyKey'
 import GifList from '../components/GifList'
+import GifSearch from '../components/GifSearch'
 
 export default class GifListContainer extends React.Component {
   state = {
@@ -12,8 +13,28 @@ export default class GifListContainer extends React.Component {
     .then(res => res.json())
     .then(gifs => {
       const data = gifs.data
-      const gifUrls = [data[0].embed_url, data[1].embed_url, data[2].embed_url]
+      const gifUrls = [data[0].images.fixed_height.url, data[1].images.fixed_height.url, data[2].images.fixed_height.url]
       return this.setState({
+        gifs: gifUrls
+      })
+    })
+  }
+
+  handleSubmit = (searchValue) => {
+    let searchTerm;
+
+    if (searchValue) {
+      searchTerm = searchValue.toLowerCase().split(' ').join('+');
+    } else {
+      searchTerm = "coffee"
+    }
+
+    fetch(`http://api.giphy.com/v1/gifs/search?q=${searchTerm}&api_key=${key}&limit=5`)
+    .then(res => res.json())
+    .then(gifs => {
+      const data = gifs.data
+      const gifUrls = [data[0].images.fixed_height.url, data[1].images.fixed_height.url, data[2].images.fixed_height.url]
+      this.setState({
         gifs: gifUrls
       })
     })
@@ -21,8 +42,9 @@ export default class GifListContainer extends React.Component {
 
   render() {
     return (
-      <div>
+      <div className="row">
         <GifList gifs={this.state.gifs} />
+        <GifSearch handleSubmit={this.handleSubmit} />
       </div>
     )
   }
